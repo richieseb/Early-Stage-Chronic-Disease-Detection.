@@ -1,0 +1,24 @@
+import numpy as np
+import pandas as pd
+import os
+
+# Create the data directory if it doesn't exist
+os.makedirs('data', exist_ok=True)
+
+# Generate identical distribution matching your project scope
+np.random.seed(42)
+num_patients = 600
+
+bp = np.random.normal(75, 12, num_patients)
+creatinine = np.random.exponential(1.2, num_patients)
+
+df = pd.DataFrame({
+    'Blood_Pressure': bp,
+    'Serum_Creatinine': creatinine
+})
+risk = (df['Serum_Creatinine'] * 1.8) + (np.abs(df['Blood_Pressure'] - 75) * 0.05)
+df['Diagnosis_Target'] = (risk > 2.2).astype(int)
+
+# Save to the data folder
+df.to_csv('data/ckd_clinical_records.csv', index=False)
+print("Dataset successfully generated at data/ckd_clinical_records.csv")
