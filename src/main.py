@@ -18,7 +18,8 @@ def generate_synthetic_clinical_data(samples=600):
 
 if __name__ == "__main__":
     # Ingest clinical samples
-    raw_data = generate_synthetic_clinical_data()
+    # Instead of generating it programmatically in main:
+    raw_data = pd.read_csv('data/ckd_clinical_records.csv')
     
     # Process attributes through our pipeline
     X, y, data_scaler = clean_and_scale_data(raw_data)
