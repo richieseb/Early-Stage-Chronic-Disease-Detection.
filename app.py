@@ -12,13 +12,9 @@ st.title("🏥 Chronic Kidney Disease Diagnostic Workspace")
 st.subheader("Comparative Machine Learning Interface (GNB vs. KNN)")
 
 # Load Data
-# Replace your current load_data function entirely with this:
 @st.cache_data
 def load_data():
     """Generates synthetic patient clinical data profiles directly in memory."""
-    import numpy as np
-    import pandas as pd
-    
     np.random.seed(42)
     samples = 600
     
@@ -36,6 +32,7 @@ def load_data():
     df['Diagnosis_Target'] = (risk > 2.2).astype(int)
     
     return df
+
 try:
     raw_data = load_data()
     
@@ -50,25 +47,33 @@ try:
     
     gnb = train_probabilistic_model(X_train, y_train)
     knn, optimal_k = train_optimized_knn(X_train, y_train)
+    
+    # 1. Capture user inputs into a structured 2D array
     new_sample = np.array([[float(input_bp), float(input_creatinine)]])
 
-    # 2. Scale the sample for KNN (vital since KNN is distance-based!)
+    # 2. Scale the sample using the fitted scaler (Crucial for both models here)
     new_sample_scaled = scaler.transform(new_sample)
-    gnb_pred = gnb.predict(new_sample)[0]        # Raw values for Naive Bayes
-    knn_pred = knn.predict(new_sample_scaled)[0] # Scaled values for KNN
+    
+    # 3. Generate dynamic predictions based on scaled metrics
+    gnb_pred = gnb.predict(new_sample_scaled)[0] 
+    knn_pred = knn.predict(new_sample_scaled)[0] 
+    
+    # UI Component Presentation Layout
     col1, col2 = st.columns(2)
+    
     with col1:
         st.metric(label="Gaussian Naïve Bayes Accuracy", value=f"{accuracy_score(y_test, gnb.predict(X_test))*100:.2f}%")
-    # Dynamic text update based on gnb_pred variable
         if gnb_pred == 1:
             st.error("🚨 GNB Diagnosis: At Risk")
         else:
             st.success("✅ GNB Diagnosis: Healthy")
-    
+            
     with col2:
         st.metric(label=f"KNN (K={optimal_k}) Accuracy", value=f"{accuracy_score(y_test, knn.predict(X_test))*100:.2f}%")
-    # Dynamic text update based on knn_pred variable
         if knn_pred == 1:
             st.error("🚨 KNN Diagnosis: At Risk")
         else:
             st.success("✅ KNN Diagnosis: Healthy")
+
+except Exception as e:
+    st.error(f"An unexpected runtime error occurred: {e}")
