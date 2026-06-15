@@ -50,26 +50,25 @@ try:
     
     gnb = train_probabilistic_model(X_train, y_train)
     knn, optimal_k = train_optimized_knn(X_train, y_train)
-    
-    # Predict New Instance
-    new_sample = np.array([[input_bp, input_creatinine]])
+    new_sample = np.array([[float(input_bp), float(input_creatinine)]])
+
+    # 2. Scale the sample for KNN (vital since KNN is distance-based!)
     new_sample_scaled = scaler.transform(new_sample)
-    
-    gnb_pred = gnb.predict(new_sample)[0]
-    knn_pred = knn.predict(new_sample_scaled)[0]
-    
-    # Layout Performance Metrics
+    gnb_pred = gnb.predict(new_sample)[0]        # Raw values for Naive Bayes
+    knn_pred = knn.predict(new_sample_scaled)[0] # Scaled values for KNN
     col1, col2 = st.columns(2)
-    
     with col1:
         st.metric(label="Gaussian Naïve Bayes Accuracy", value=f"{accuracy_score(y_test, gnb.predict(X_test))*100:.2f}%")
-        status_gnb = "🚨 At Risk" if gnb_pred == 1 else "✅ Healthy"
-        st.write(f"**GNB Diagnosis:** {status_gnb}")
-        
+    # Dynamic text update based on gnb_pred variable
+        if gnb_pred == 1:
+            st.error("🚨 GNB Diagnosis: At Risk")
+        else:
+            st.success("✅ GNB Diagnosis: Healthy")
+    
     with col2:
         st.metric(label=f"KNN (K={optimal_k}) Accuracy", value=f"{accuracy_score(y_test, knn.predict(X_test))*100:.2f}%")
-        status_knn = "🚨 At Risk" if knn_pred == 1 else "✅ Healthy"
-        st.write(f"**KNN Diagnosis:** {status_knn}")
-
-except FileNotFoundError:
-    st.error("Dataset not found. Please ensure 'data/ckd_clinical_records.csv' exists in the repository.")
+    # Dynamic text update based on knn_pred variable
+        if knn_pred == 1:
+            st.error("🚨 KNN Diagnosis: At Risk")
+        else:
+            st.success("✅ KNN Diagnosis: Healthy")
