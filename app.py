@@ -12,10 +12,30 @@ st.title("🏥 Chronic Kidney Disease Diagnostic Workspace")
 st.subheader("Comparative Machine Learning Interface (GNB vs. KNN)")
 
 # Load Data
+# Replace your current load_data function entirely with this:
 @st.cache_data
 def load_data():
-    return pd.read_csv('data/ckd_clinical_records.csv')
-
+    """Generates synthetic patient clinical data profiles directly in memory."""
+    import numpy as np
+    import pandas as pd
+    
+    np.random.seed(42)
+    samples = 600
+    
+    # Generate realistic distributions for medical indicators
+    bp = np.random.normal(75, 12, samples)
+    creatinine = np.random.exponential(1.2, samples)
+    
+    df = pd.DataFrame({
+        'Blood_Pressure': bp, 
+        'Serum_Creatinine': creatinine
+    })
+    
+    # Establish systemic class criteria (1: At Risk, 0: Healthy)
+    risk = (df['Serum_Creatinine'] * 1.8) + (np.abs(df['Blood_Pressure'] - 75) * 0.05)
+    df['Diagnosis_Target'] = (risk > 2.2).astype(int)
+    
+    return df
 try:
     raw_data = load_data()
     
